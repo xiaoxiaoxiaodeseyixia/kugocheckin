@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { close_api, delay, send, startService } from "./utils/utils.js";
+import { printBlue, printGreen, printMagenta, printRed, printYellow } from "./utils/colorOut.js";
 
 async function qrcode() {
 
@@ -7,7 +8,9 @@ async function qrcode() {
   const api = startService()
   await delay(2000)
   let qrcode = ""
-  const userinfo = []
+  const USERINFO = process.env.USERINFO
+  const APPEND_USER = process.env.APPEND_USER
+  const userinfo = (USERINFO && APPEND_USER == "是") ? JSON.parse(USERINFO) : []
   const args = process.argv.slice(2);
   const number = parseInt(process.env.NUMBER || args[0] || "1")
   const pat = process.env.PAT
@@ -19,16 +22,16 @@ async function qrcode() {
         qrcode = result.data.qrcode
         const img_base64 = result.data.qrcode_img;
         const chunkSize = 1000;
-        console.log("二维码链接如下, 请在浏览器打开使用APP扫描并确认登录")
+        printMagenta("二维码链接如下, 请在浏览器打开使用APP扫描并确认登录")
         for (let i = 0; i < img_base64.length; i += chunkSize) {
           console.log(img_base64.slice(i, i + chunkSize));
         }
       } else {
-        console.log("响应内容")
+        printRed("响应内容")
         console.dir(result, { depth: null })
         throw new Error("请求出错")
       }
-      console.log("正在等待，请扫描二维码并确定登录")
+      printMagenta("正在等待，请扫描二维码并确定登录")
       // 登录
       for (let i = 0; i < 25; i++) {
         const timestrap = Date.now();
@@ -36,7 +39,7 @@ async function qrcode() {
         const status = res?.data?.status
         switch (status) {
           case 0:
-            console.log("二维码已过期")
+            printYellow("二维码已过期")
             break
 
           case 1:
@@ -47,38 +50,53 @@ async function qrcode() {
             // console.log("二维码未确认，请点击确认登录")
             break
           case 4:
-            console.log("登录成功！")
-            userinfo.push({
-              userid: res.data.userid,
-              token: res.data.token
-            })
+            let userAlreadyExist = false
+            printGreen("登录成功！")
+            if (APPEND_USER == "是") {
+              for (let i = 0; i < userinfo.length; i++) {
+
+                if (userinfo[i].userid == res.data.userid) {
+                  userAlreadyExist = true
+                  printYellow(`userid: ${userinfo[i].userid} 此账号已存在, 仅更新登录信息`)
+                  userinfo[i].token = res.data.token
+                }
+              }
+            }
+            if (!userAlreadyExist) {
+              userinfo.push({
+                userid: res.data.userid,
+                token: res.data.token
+              })
+            }
             break;
           default:
-            console.log("请求出错")
+            printRed("请求出错")
             console.dir(res, { depth: null })
         }
         if (status == 4 || status == 0) {
           break
         }
         if (i == 24) {
-          console.log("等待超时\n")
+          printRed("等待超时\n")
           break
         }
         await delay(5000)
       }
     }
-    const userinfoJSON = JSON.stringify(userinfo)
-    if (pat) {
-      try {
-        execSync(`gh secret set USERINFO -b'${userinfoJSON}' --repo ${process.env.GITHUB_REPOSITORY}`);
-        console.log("secret <USERINFO> 更改成功")
-      } catch (error) {
-        console.log("自动写入出错，登录信息如下，请手动添加到secret USERINFO")
-        console.log(userinfoJSON)
+    if (userinfo.length) {
+      const userinfoJSON = JSON.stringify(userinfo)
+      if (pat) {
+        try {
+          execSync(`gh secret set USERINFO -b'${userinfoJSON}' --repo ${process.env.GITHUB_REPOSITORY}`);
+          printGreen("secret <USERINFO> 更改成功")
+        } catch (error) {
+          printRed("自动写入出错，登录信息如下，请手动添加到secret USERINFO")
+          printRed(userinfoJSON)
+        }
+      } else {
+        printGreen("登录信息如下，把它添加到secret USERINFO 即可")
+        printBlue(userinfoJSON)
       }
-    } else {
-      console.log("登录信息如下，把它添加到secret USERINFO 即可")
-      console.log(userinfoJSON)
     }
   } finally {
     close_api(api)
