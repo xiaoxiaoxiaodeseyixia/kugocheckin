@@ -3,27 +3,19 @@ on:
   workflow_dispatch:
     inputs:
       number:
-        description: "需要登录几个账号？"
+        description: "需要登录几个账号?"
         required: true
         default: 1
-      append_user:
-        description: "是否追加新账号？（不删除已存在账号信息）"
-        required: true
-        default: "否"
-        type: choice
-        options:
-          - 是
-          - 否
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - name: 检出仓库
-        uses: actions/checkout@v6
+        uses: actions/checkout@v3
       - name: 创建node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v3
         with:
-          node-version: 24
+          node-version: 18
           cache: 'npm'
           cache-dependency-path: ./api/package-lock.json
       - name: 🔧 安装GitHub CLI，并使用PAT登录
@@ -42,7 +34,7 @@ jobs:
           fi
       - name: Cache node_modules in api directory
         id: cache-npm
-        uses: actions/cache@v5
+        uses: actions/cache@v3
         with:
           path: ./api/node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('./api/package-lock.json') }}
@@ -57,5 +49,3 @@ jobs:
           NUMBER: ${{ github.event.inputs.number }}
           PAT: ${{ secrets.PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          USERINFO: ${{ secrets.USERINFO }}
-          APPEND_USER: ${{ github.event.inputs.append_user }}
