@@ -6,21 +6,21 @@ async function login() {
   const code = process.env.CODE
 
   // 不使用二维码登录并且没有手机号或验证码
-  if (!phone || !code) {
+  如果 (!电话 || !代码) {
     throw new Error("未配置")
   }
   // 启动服务
   const api = startService()
   await delay(2000)
 
-  try {
+  尝试 {
     // 手机号登录请求
     const result = await send(`/login/cellphone?mobile=${phone}&code=${code}`, "GET", {})
-    if (result.status === 1) {
-      console.log("登录成功！")
-      console.log("第一行是token,第二行是userid")
-      console.log(result.data.token)
-      console.log(result.data.userid)
+    如果 (result.status === 1) {
+      控制台.日志("登录成功！")
+      控制台.日志("第一行是token,第二行是userid")
+      控制台.日志(结果.数据.令牌)
+      控制台.日志(结果.数据.用户我D)
     } else if (result.error_code === 34175) {
       throw new Error("暂不支持多账号绑定手机登录")
     } else {
@@ -32,8 +32,8 @@ async function login() {
     close_api(api)
   }
 
-  if (api.killed) {
-    process.exit(0)
+  如果 (api.已终止) {
+    进程.退出(0)
   }
 }
 
