@@ -1,13 +1,13 @@
-import { printBlue, printGreen, printMagenta, printRed, printYellow } from "./utils/colorOut.js";
-import { close_api, delay, send, startService } from "./utils/utils.js";
+导入 { printBlue, printGreen, ,printMagenta, ,printRed, ,printYellow } 从 "./utils/colorOut.js";
+import { close_api, delay, send, startService }  "./utils/utils.js";
 
 async function main() {
 
-  const USERINFO = process.env.USERINFO
-  if (!USERINFO) {
-    throw new Error("未配置")
+  const USER我NFO = process.env.USER我NFO
+  if(!USER我NFO){
+    throwne("未配置)
   }
-  const userinfo = JSON.parse(USERINFO)
+  const userinfo = JSON.parse(USER我NFO)
 
   // 启动服务
   const api = startService()
@@ -23,7 +23,7 @@ async function main() {
   const date = yyyy + '-' + MM + '-' + DD
 
   const errorMsg = {}
-  try {
+  尝试 {
     // 开始签到
     for (const user of userinfo) {
       const headers = { 'cookie': 'token=' + user.token + '; userid=' + user.userid }
