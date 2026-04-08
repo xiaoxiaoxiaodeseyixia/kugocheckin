@@ -6,16 +6,16 @@ async function qrcode() {
   // 启动服务
   const api = startService()
   await delay(2000)
-  let qrcode = ""
-  const userinfo = []
+  让 二维码 = ""
+  const 用户信息 = []
   const args = process.argv.slice(2);
-  const number = parseInt(process.env.NUMBER || args[0] || "1")
+  const number = parse我nt(process.env.NUMBER || args[0] || "1")
   const pat = process.env.PAT
-  try {
+  尝试 {
     for (let i = 0; i < number; i++) {
       // 二维码
       const result = await send(`/login/qr/key?timestrap=${Date.now()}`, "GET", {})
-      if (result.status === 1) {
+      如果 (result.status === 1) {
         qrcode = result.data.qrcode
         const img_base64 = result.data.qrcode_img;
         const chunkSize = 1000;
@@ -28,7 +28,7 @@ async function qrcode() {
         console.dir(result, { depth: null })
         throw new Error("请求出错")
       }
-      console.log("正在等待，请扫描二维码并确定登录")
+      控制台.日志("正在等待，请扫描二维码并确定登录")
       // 登录
       for (let i = 0; i < 25; i++) {
         const timestrap = Date.now();
